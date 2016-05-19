@@ -323,9 +323,9 @@ public class MainFrame extends JFrame implements KeyListener, FileHistoryListene
         context.getKeyStroke().apply(this);
         context.getKeyStroke().apply(tab.popupMenu);
         resources.inject(this);
-        if (OSDetector.isMac()) {
-            macApp = new MacApplicationWrapper(this);
-        }
+//        if (OSDetector.isMac()) {
+//            macApp = new MacApplicationWrapper(this);
+//        }
         DropTarget target = new DropTarget(this,
                 DnDConstants.ACTION_REFERENCE,
                 mainFrameDropTargetListener
@@ -355,7 +355,7 @@ public class MainFrame extends JFrame implements KeyListener, FileHistoryListene
         searcher.config_searchText.grabFocus();
     }
 
-    MacApplicationWrapper macApp = null;
+//    MacApplicationWrapper macApp = null;
 
     public void closePushed(int index) {
         closeSamuraiPanel(index);
