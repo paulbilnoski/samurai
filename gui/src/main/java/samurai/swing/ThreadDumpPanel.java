@@ -64,7 +64,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Properties;
+import java.util.Vector;
 
 public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
         ConfigurationListener, ClipBoardOperationListener {
@@ -666,7 +668,10 @@ public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
                 public void run() {
                     showMe(resources.getMessage("ThreadDumpPanel.threadDump"));
                     threadList = statistic.getStackTracesAsArray();
-                    showThreadList.setListData(threadList);
+                    Vector<ThreadDumpSequence> input = new Vector<>(Arrays.asList(threadList));
+                    input.sort((a,b) -> a.toString().compareTo(b.toString()));
+
+                    showThreadList.setListData(input);
                     showThreadList.clearSelection();
                 }
             });
@@ -677,7 +682,7 @@ public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
     JSplitPane jSplitPane1 = new JSplitPane();
     JScrollPane jScrollPane2 = new JScrollPane();
     JScrollPane jScrollPane3 = new JScrollPane();
-    JList showThreadList = new JList();
+    JList<ThreadDumpSequence> showThreadList = new JList<>();
     JLabel threadDumpStatus = new JLabel();
     File currentFile;
 
@@ -715,15 +720,15 @@ public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
         changeBunttonFeel();
     }
 
-    void showThreadList_actionPerformed(ActionEvent e) {
-        if (showThreadList.getSelectedIndex() == 0) {
-            filter.setMode(Constants.MODE_FULL);
-        } else {
-            filter.setMode(Constants.MODE_SEQUENCE);
-            filter.setThreadId((String) showThreadList.getSelectedValue());
-        }
-        updateHtml();
-    }
+    //void showThreadList_actionPerformed(ActionEvent e) {
+    //    if (showThreadList.getSelectedIndex() == 0) {
+    //        filter.setMode(Constants.MODE_FULL);
+    //    } else {
+    //        filter.setMode(Constants.MODE_SEQUENCE);
+    //        filter.setThreadId((String) showThreadList.getSelectedValue());
+    //    }
+    //    updateHtml();
+    //}
 
     public synchronized void onConfigurationChanged(Configuration config) {
         config.apply(renderer);
@@ -732,13 +737,12 @@ public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
         updateHtml();
     }
 
-    class ThreadCellRenderer extends JLabel implements ListCellRenderer {
+    class ThreadCellRenderer extends JLabel implements ListCellRenderer<ThreadDumpSequence> {
         public ThreadCellRenderer() {
             setOpaque(true);
         }
 
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            ThreadDumpSequence threadDumps = ((ThreadDumpSequence) value);
+        public Component getListCellRendererComponent(JList<? extends ThreadDumpSequence> list, ThreadDumpSequence threadDumps, int index, boolean isSelected, boolean cellHasFocus) {
             ThreadDump currentThreadDump = threadDumps.get(filter.getFullThreadIndex());
 
             Color fgColor = Color.BLACK;
@@ -755,7 +759,7 @@ public class ThreadDumpPanel extends LogRenderer implements HyperlinkListener,
                 //no thread in this fullthreaddump
 //        fgColor = Color.GRAY;
             }
-            setText(value.toString());
+            setText(threadDumps.toString());
             setBackground(isSelected ? fgColor : Color.white);
             setForeground(isSelected ? Color.white : fgColor);
             return this;
